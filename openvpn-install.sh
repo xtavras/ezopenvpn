@@ -61,7 +61,28 @@ if [ -e /etc/openvpn/server.conf ]; then
 			cd ~/ovpn-$CLIENT
 			sed -i "s|cert client.crt|cert $CLIENT.crt|" $CLIENT.conf
 			sed -i "s|key client.key|key $CLIENT.key|" $CLIENT.conf
-			tar -czf ../ovpn-$CLIENT.tar.gz $CLIENT.conf ca.crt $CLIENT.crt $CLIENT.key
+			echo "remote-cert-tls server" >> $CLIENT.conf
+			
+			cp $CLIENT.conf $CLIENT.ovpn
+			
+			sed -i "s|ca ca.crt|ca [inline]|" $CLIENT.ovpn
+			sed -i "s|cert $CLIENT.crt|cert [inline]|" $CLIENT.ovpn
+			sed -i "s|key $CLIENT.key|key [inline]|" $CLIENT.ovpn
+			echo -e "keepalive 10 60\n" >> $CLIENT.ovpn
+			
+			echo "<ca>" >> $CLIENT.ovpn
+			cat ca.crt >> $CLIENT.ovpn
+			echo -e "</ca>\n" >> $CLIENT.ovpn
+			
+			echo "<cert>" >> $CLIENT.ovpn
+			sed -n "/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p" $CLIENT.crt >> $CLIENT.ovpn
+			echo -e "</cert>\n" >> $CLIENT.ovpn
+			
+			echo "<key>" >> $CLIENT.ovpn
+			cat $CLIENT.key >> $CLIENT.ovpn
+			echo -e "</key>\n" >> $CLIENT.ovpn
+			
+			tar -czf ../ovpn-$CLIENT.tar.gz $CLIENT.conf ca.crt $CLIENT.crt $CLIENT.key $CLIENT.ovpn
 			cd ~/
 			rm -rf ovpn-$CLIENT
 			echo ""
@@ -116,7 +137,7 @@ else
 	echo ""
 	echo "Do you want OpenVPN to be available at port 53 too?"
 	echo "This can be useful to connect under restrictive networks"
-	read -p "Listen at port 53 [y/n]:" -e -i n ALTPORT
+	read -p "Listen at port 53 [y/n]:" -e -i y ALTPORT
 	echo ""
 	echo "Finally, tell me your name for the client cert"
 	echo "Please, use one word only, no special characters"
@@ -139,7 +160,7 @@ else
 	cd /etc/openvpn/easy-rsa/2.0/
 	# Let's fix one thing first...
 	cp -u -p openssl-1.0.0.cnf openssl.cnf
-	# Fuck you NSA - 1024 bits was the default for Debian Wheezy and older
+	# Bad NSA - 1024 bits was the default for Debian Wheezy and older
 	sed -i 's|export KEY_SIZE=1024|export KEY_SIZE=2048|' /etc/openvpn/easy-rsa/2.0/vars
 	# Create the PKI
 	. /etc/openvpn/easy-rsa/2.0/vars
@@ -168,8 +189,8 @@ else
 	# Set the server configuration
 	sed -i 's|dh dh1024.pem|dh dh2048.pem|' server.conf
 	sed -i 's|;push "redirect-gateway def1 bypass-dhcp"|push "redirect-gateway def1 bypass-dhcp"|' server.conf
-	sed -i 's|;push "dhcp-option DNS 208.67.222.222"|push "dhcp-option DNS 129.250.35.250"|' server.conf
-	sed -i 's|;push "dhcp-option DNS 208.67.220.220"|push "dhcp-option DNS 74.82.42.42"|' server.conf
+	sed -i 's|;push "dhcp-option DNS 208.67.222.222"|push "dhcp-option DNS 8.8.8.8"|' server.conf
+	sed -i 's|;push "dhcp-option DNS 208.67.220.220"|push "dhcp-option DNS 8.8.4.4"|' server.conf
 	sed -i "s|port 1194|port $PORT|" server.conf
 	# Listen at port 53 too if user wants that
 	if [ $ALTPORT = 'y' ]; then
@@ -211,7 +232,28 @@ else
 	cd ~/ovpn-$CLIENT
 	sed -i "s|cert client.crt|cert $CLIENT.crt|" $CLIENT.conf
 	sed -i "s|key client.key|key $CLIENT.key|" $CLIENT.conf
-	tar -czf ../ovpn-$CLIENT.tar.gz $CLIENT.conf ca.crt $CLIENT.crt $CLIENT.key
+	echo "remote-cert-tls server" >> $CLIENT.conf
+	
+	cp $CLIENT.conf $CLIENT.ovpn
+	
+	sed -i "s|ca ca.crt|ca [inline]|" $CLIENT.ovpn
+	sed -i "s|cert $CLIENT.crt|cert [inline]|" $CLIENT.ovpn
+	sed -i "s|key $CLIENT.key|key [inline]|" $CLIENT.ovpn
+	echo -e "keepalive 10 60\n" >> $CLIENT.ovpn
+	
+	echo "<ca>" >> $CLIENT.ovpn
+	cat ca.crt >> $CLIENT.ovpn
+	echo -e "</ca>\n" >> $CLIENT.ovpn
+	
+	echo "<cert>" >> $CLIENT.ovpn
+	sed -n "/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p" $CLIENT.crt >> $CLIENT.ovpn
+	echo -e "</cert>\n" >> $CLIENT.ovpn
+	
+	echo "<key>" >> $CLIENT.ovpn
+	cat $CLIENT.key >> $CLIENT.ovpn
+	echo -e "</key>\n" >> $CLIENT.ovpn
+
+	tar -czf ../ovpn-$CLIENT.tar.gz $CLIENT.conf ca.crt $CLIENT.crt $CLIENT.key $CLIENT.ovpn
 	cd ~/
 	rm -rf ovpn-$CLIENT
 	echo ""
