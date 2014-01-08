@@ -155,7 +155,6 @@ else
 		mkdir -p /etc/openvpn/easy-rsa/2.0/
 		cp ~/easy-rsa-2.2.2/easy-rsa/2.0/* /etc/openvpn/easy-rsa/2.0/
 		rm -rf ~/easy-rsa-2.2.2
-		rm -rf ~/easy-rsa.tar.gz
 	fi
 	cd /etc/openvpn/easy-rsa/2.0/
 	# Let's fix one thing first...
