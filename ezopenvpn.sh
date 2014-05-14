@@ -13,8 +13,14 @@ fi
 
 
 if [ ! -e /dev/net/tun ]; then
-    echo "TUN/TAP is not available"
-    exit
+	echo "TUN/TAP is not available"
+	exit
+fi
+
+
+if [ ! -e /etc/debian_version ]; then
+	echo "Looks like you aren't running this installer on a Debian-based system"
+	exit
 fi
 
 
@@ -112,7 +118,7 @@ if [ -e /etc/openvpn/server.conf ]; then
 			apt-get remove --purge -y openvpn openvpn-blacklist
 			rm -rf /etc/openvpn
 			rm -rf /usr/share/doc/openvpn
-			sed -i '/--dport 53 -j REDIRECT --to-port 1194/d' /etc/rc.local
+			sed -i '/--dport 53 -j REDIRECT --to-port/d' /etc/rc.local
 			sed -i '/iptables -t nat -A POSTROUTING -s 10.8.0.0/d' /etc/rc.local
 			echo ""
 			echo "OpenVPN removed!"
@@ -155,6 +161,7 @@ else
 		mkdir -p /etc/openvpn/easy-rsa/2.0/
 		cp ~/easy-rsa-2.2.2/easy-rsa/2.0/* /etc/openvpn/easy-rsa/2.0/
 		rm -rf ~/easy-rsa-2.2.2
+		rm -rf ~/easy-rsa.tar.gz
 	fi
 	cd /etc/openvpn/easy-rsa/2.0/
 	# Let's fix one thing first...
@@ -193,8 +200,8 @@ else
 	sed -i "s|port 1194|port $PORT|" server.conf
 	# Listen at port 53 too if user wants that
 	if [ $ALTPORT = 'y' ]; then
-		iptables -t nat -A PREROUTING -p udp -d $IP --dport 53 -j REDIRECT --to-port 1194
-		sed -i "/# By default this script does nothing./a\iptables -t nat -A PREROUTING -p udp -d $IP --dport 53 -j REDIRECT --to-port 1194" /etc/rc.local
+		iptables -t nat -A PREROUTING -p udp -d $IP --dport 53 -j REDIRECT --to-port $PORT
+		sed -i "/# By default this script does nothing./a\iptables -t nat -A PREROUTING -p udp -d $IP --dport 53 -j REDIRECT --to-port $PORT" /etc/rc.local
 	fi
 	# Enable net.ipv4.ip_forward for the system
 	sed -i 's|#net.ipv4.ip_forward=1|net.ipv4.ip_forward=1|' /etc/sysctl.conf
