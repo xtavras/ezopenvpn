@@ -13,9 +13,9 @@ Run the script and follow the assistant:
 Once it ends, you can run it again to add more users.
 
 ###New features
-- Automatic .ovpn file generation with all certificates inline
+- Automatic inline .ovpn file generation for Android devices
 - Google DNS servers
-- Port 53 enabled by default
+- Port 53 enabled by default for captive portal bypass
 
 ###I want to run my own VPN but don't have a server for that
 There are reliable providers where you can get a little VPS for even less than one buck a month.
