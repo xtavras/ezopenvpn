@@ -87,12 +87,12 @@ if [ -e /etc/openvpn/server.conf ]; then
 			echo "<key>" >> $CLIENT.ovpn
 			cat $CLIENT.key >> $CLIENT.ovpn
 			echo -e "</key>\n" >> $CLIENT.ovpn
-			
-			tar -czf ../ovpn-$CLIENT.tar.gz $CLIENT.conf ca.crt $CLIENT.crt $CLIENT.key $CLIENT.ovpn
+
+			zip ../ovpn-$CLIENT.zip $CLIENT.conf ca.crt $CLIENT.crt $CLIENT.key $CLIENT.ovpn
 			cd ~/
 			rm -rf ovpn-$CLIENT
 			echo ""
-			echo "Client $CLIENT added, certs available at ~/ovpn-$CLIENT.tar.gz"
+			echo "Client $CLIENT added, certs available at ~/ovpn-$CLIENT.zip"
 			exit
 			;;
 			2)
